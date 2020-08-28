@@ -149,8 +149,8 @@ rclone_config = configparser.ConfigParser()
 rclone_config['qbittorrent_rclone'] = {
     'type': 'drive',
     'scope': 'drive',
-    'root_folder_id': google_drive_folder_id,
     'team_drive': team_drive,
+    'root_folder_id': google_drive_folder_id,
     'service_account_file': current_sa.__str__()
 }
 
