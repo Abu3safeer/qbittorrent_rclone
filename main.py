@@ -1,13 +1,13 @@
 import logging
 import argparse
-import os
+import subprocess
 from pathlib import Path
 import configparser
 
 # Get current script path
 script_path = Path(__file__).parent
 
-# Prepare loggin
+# Prepare logging
 log = logging.getLogger('qbittorrent_rclone')
 log.setLevel(1)
 log_format = logging.Formatter('%(asctime)s: %(message)s')
@@ -33,11 +33,21 @@ if not (pars.torrent_name or pars.content_path or pars.root_path or pars.save_pa
 # Prepare directories paths
 accounts_path = Path(f'{script_path}/accounts')
 configs_path = Path(f'{script_path}/configs')
+logs_path = Path(f'{script_path}/logs')
 settings_path = Path(f'{script_path}/settings.ini')
+logs_file_path = Path(f'{logs_path}/{pars.torrent_name}.txt')
 
-# Check configs directory
+# Check configs and logs directory
 if not configs_path.exists():
     configs_path.mkdir()
+if not logs_path.exists():
+    logs_path.mkdir()
+
+# Change file handler name to Torrent name
+log.removeHandler(file_log)
+file_log = logging.FileHandler(logs_file_path, encoding='utf-8')
+file_log.setFormatter(log_format)
+log.addHandler(file_log)
 
 # prepare settings file
 if not (settings_path.is_file() and settings_path.exists()):
@@ -144,11 +154,30 @@ config_file.close()
 
 log.info(f"Processing file: {pars.torrent_name}")
 
-# Prepare rclone command
-final_command = f'"{rclone_path}" {command} "{pars.content_path}" "qbittorrent_rclone:{pars.torrent_name}" --config "{config_file_path}"'
+# Here you can parse files and do what ever you want
+drive_save_path = ''
 
-log.info(f'Run command: {final_command}')
+# This checks if the torrent is single file or a folder
+# If it is a file then it will move it as it is to Drive
+# But if it is a folder then it will copy the folder
+if Path(pars.content_path).is_dir():
+    drive_save_path = pars.torrent_name
 
-os.system(final_command)
-
+try:
+    # Prepare the command
+    popen_args = [
+        f'{rclone_path}',
+        f'{command}',
+        f'{pars.content_path}',
+        f'qbittorrent_rclone:{drive_save_path}',
+        '--config',
+        f'{config_file_path}',
+        '--log-level',
+        'DEBUG',
+        f'--log-file={logs_file_path}'
+    ]
+    log.critical(popen_args)
+    subprocess.Popen(popen_args, shell=True)
+except Exception as excep:
+    log.critical(excep)
 

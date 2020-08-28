@@ -18,7 +18,7 @@ D:\Downloads\Torrent\qbittorrent_rclone
 - [x] Run external program on torrent completion
 * write this in the command field:
 ```
-python %D/qbittorrent_rclone/[SCRIPT_FILE_NAME] -t "%N" -c "%F" -r "%R" -s "%D"
+python "%D/qbittorrent_rclone/[SCRIPT_FILE_NAME]" -t "%N" -c "%F" -r "%R" -s "%D"
 ```
 * Replace [SCRIPT_FILE_NAME] with py file or exe file you downloaded.
 * put your service accounts json files in accounts folder.
