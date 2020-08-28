@@ -63,6 +63,7 @@ settings.read(settings_path.resolve())
 if not (
     settings.has_option('main', 'rclone_path') and
     settings.has_option('main', 'google_drive_folder_id') and
+    settings.has_option('main', 'team_drive') and
     settings.has_option('main', 'command') and
     settings.has_option('internal', 'sa_count') and
     settings.has_option('internal', 'current_sa')
@@ -85,8 +86,13 @@ if command not in allowed_commands:
     settings.set('main', 'command', command)
 
 google_drive_folder_id = settings.get('main', 'google_drive_folder_id')
-if len(google_drive_folder_id.lower()) < 1:
+if len(google_drive_folder_id) < 1:
     log.critical('google_drive_folder_id is empty in setting.ini, cannot proceed')
+    exit()
+
+team_drive = settings.get('main', 'team_drive')
+if len(team_drive) < 1:
+    log.critical('team_drive is empty in setting.ini, cannot proceed')
     exit()
 
 sa_count = settings.get('internal', 'sa_count')
@@ -144,6 +150,7 @@ rclone_config['qbittorrent_rclone'] = {
     'type': 'drive',
     'scope': 'drive',
     'root_folder_id': google_drive_folder_id,
+    'team_drive': team_drive,
     'service_account_file': current_sa.__str__()
 }
 
@@ -177,7 +184,7 @@ try:
         f'--log-file={logs_file_path}'
     ]
     log.critical(popen_args)
-    subprocess.Popen(popen_args, shell=True)
+    subprocess.Popen(popen_args)
 except Exception as excep:
     log.critical(excep)
 
