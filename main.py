@@ -166,7 +166,7 @@ log.info(f"Processing file: {pars.torrent_name}")
 drive_save_path = ''
 
 # Start scanning patterns
-if settings.get('main', 'team_drive') == 'yes':
+if settings.get('main', 'patterns') == 'yes':
 
     # Check if the torrent is an erai release
     if pars.torrent_name.startsWith('[Erai-raws]'):
@@ -192,6 +192,10 @@ if settings.get('main', 'team_drive') == 'yes':
     else:
         if Path(pars.content_path).is_dir():
             drive_save_path = pars.torrent_name
+
+    # Log path directory
+    log.info('Current save drive path is: ' + drive_save_path)
+
 else:
     if Path(pars.content_path).is_dir():
         drive_save_path = pars.torrent_name
