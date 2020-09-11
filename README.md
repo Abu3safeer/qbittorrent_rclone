@@ -31,3 +31,7 @@ python "%D/qbittorrent_rclone/main.py" -t "%N" -c "%F" -r "%R" -s "%D"
 * Write rclone path (System PATH used by default)
 
 You are ready to go.
+
+
+## About patterns
+This script can scan torrent name and then create a specific directory to save in Google drive, but it is still very limited so it is disabled by default.

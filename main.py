@@ -3,6 +3,7 @@ import argparse
 import subprocess
 from pathlib import Path
 import configparser
+import re
 
 # Get current script path
 script_path = Path(__file__).parent
@@ -164,11 +165,36 @@ log.info(f"Processing file: {pars.torrent_name}")
 # Here you can parse files and do what ever you want
 drive_save_path = ''
 
-# This checks if the torrent is single file or a folder
-# If it is a file then it will move it as it is to Drive
-# But if it is a folder then it will copy the folder
-if Path(pars.content_path).is_dir():
-    drive_save_path = pars.torrent_name
+# Start scanning patterns
+if settings.get('main', 'team_drive') == 'yes':
+
+    # Check if the torrent is an erai release
+    if pars.torrent_name.startsWith('[Erai-raws]'):
+
+        # Save to Erai folder
+        drive_save_path += 'Erai-raws/'
+
+        # Erai pattern
+        erai_pattern = re.compile(r'^\[Erai-raws\] (.+) - [\d ~-]+', re.MULTILINE)
+        find = re.findall(erai_pattern, pars.torrent_name)
+
+        # If pattern found
+        if find:
+            # Create sub folder for the show
+            drive_save_path += find[0]
+
+        # if the pattern does not match
+        else:
+            if Path(pars.content_path).is_dir():
+                drive_save_path += pars.torrent_name
+
+    # If no pattern found
+    else:
+        if Path(pars.content_path).is_dir():
+            drive_save_path = pars.torrent_name
+else:
+    if Path(pars.content_path).is_dir():
+        drive_save_path = pars.torrent_name
 
 try:
     # Prepare the command
