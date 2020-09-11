@@ -166,39 +166,45 @@ log.info(f"Processing file: {pars.torrent_name}")
 drive_save_path = ''
 
 # Start scanning patterns
-if settings.get('main', 'patterns') == 'yes':
+try:
+    if settings.get('main', 'patterns') == 'yes':
 
-    # Check if the torrent is an erai release
-    if pars.torrent_name.startsWith('[Erai-raws]'):
+        # Check if the torrent is an erai release
+        if pars.torrent_name.startswith('[Erai-raws]'):
 
-        # Save to Erai folder
-        drive_save_path += 'Erai-raws/'
+            # Save to Erai folder
+            drive_save_path += 'Erai-raws/'
+            log.info('It is an Erai-raws release')
 
-        # Erai pattern
-        erai_pattern = re.compile(r'^\[Erai-raws\] (.+) - [\d ~-]+', re.MULTILINE)
-        find = re.findall(erai_pattern, pars.torrent_name)
+            # Erai pattern
+            erai_pattern = re.compile(r'^\[Erai-raws\] (.+) - [\d ~-]+', re.MULTILINE)
+            find = re.findall(erai_pattern, pars.torrent_name)
 
-        # If pattern found
-        if find:
-            # Create sub folder for the show
-            drive_save_path += find[0]
+            # If pattern found
+            if find:
+                # Create sub folder for the show
+                drive_save_path += find[0]
 
-        # if the pattern does not match
+            # if the pattern does not match
+            else:
+                if Path(pars.content_path).is_dir():
+                    drive_save_path += pars.torrent_name
+
+        # If no pattern found
         else:
             if Path(pars.content_path).is_dir():
-                drive_save_path += pars.torrent_name
+                drive_save_path = pars.torrent_name
 
-    # If no pattern found
     else:
         if Path(pars.content_path).is_dir():
             drive_save_path = pars.torrent_name
 
-    # Log path directory
-    log.info('Current save drive path is: ' + drive_save_path)
+except Exception as excep:
+    log.critical(excep)
 
-else:
-    if Path(pars.content_path).is_dir():
-        drive_save_path = pars.torrent_name
+
+# Log path directory
+log.info('Current save drive path is: ' + drive_save_path)
 
 try:
     # Prepare the command
