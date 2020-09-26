@@ -31,12 +31,18 @@ if not (pars.torrent_name or pars.content_path or pars.root_path or pars.save_pa
     log.critical('One argument at least missing, please follow instructions here https://github.com/Abu3safeer/qbittorrent_rclone')
     exit()
 
+# Define variables
+torrent_name = pars.torrent_name  # type: str
+content_path = pars.content_path  # type: str
+root_path = pars.root_path  # type: str
+save_path = pars.save_path  # type: str
+
 # Prepare directories paths
 accounts_path = Path(f'{script_path}/accounts')
 configs_path = Path(f'{script_path}/configs')
 logs_path = Path(f'{script_path}/logs')
 settings_path = Path(f'{script_path}/settings.ini')
-logs_file_path = Path(f'{logs_path}/{pars.torrent_name}.txt')
+logs_file_path = Path(f'{logs_path}/{torrent_name}.txt')
 
 # Check configs and logs directory
 if not configs_path.exists():
@@ -160,7 +166,7 @@ config_file = open(config_file_path, 'w')
 rclone_config.write(config_file)
 config_file.close()
 
-log.info(f"Processing file: {pars.torrent_name}")
+log.info(f"Processing file: {torrent_name}")
 
 # Here you can parse files and do what ever you want
 drive_save_path = ''
@@ -170,7 +176,7 @@ try:
     if settings.get('main', 'patterns') == 'yes':
 
         # Check if the torrent is an erai release
-        if pars.torrent_name.startswith('[Erai-raws]'):
+        if torrent_name.startswith('[Erai-raws]'):
 
             # Save to Erai folder
             drive_save_path += 'Erai-raws/'
@@ -178,7 +184,7 @@ try:
 
             # Erai pattern
             erai_pattern = re.compile(r'^\[Erai-raws\] (.+) - [\d ~-]+', re.MULTILINE)
-            find = re.findall(erai_pattern, pars.torrent_name)
+            find = re.findall(erai_pattern, torrent_name)
 
             # If pattern found
             if find:
@@ -187,17 +193,67 @@ try:
 
             # if the pattern does not match
             else:
-                if Path(pars.content_path).is_dir():
-                    drive_save_path += pars.torrent_name
+                if Path(content_path).is_dir():
+                    drive_save_path += torrent_name
+        
+        # Check if the torrent is BDMV
+        elif torrent_name.count('BDMV') or torrent_name.count('bdmv'):
+            drive_save_path += '[BMDV]/'
+
+            # Check if torrent has language code
+            if torrent_name.count('AU'):
+                drive_save_path += '[AU]'
+            if torrent_name.count('FRA'):
+                drive_save_path += '[FRA]'
+            if torrent_name.count('GER'):
+                drive_save_path += '[GER]'
+            if torrent_name.count('ITA'):
+                drive_save_path += '[ITA]'
+            if torrent_name.count('JP'):
+                drive_save_path += '[JP]'
+            if torrent_name.count('UK'):
+                drive_save_path += '[UK]'
+            if torrent_name.count('US'):
+                drive_save_path += '[US]'
+
+            drive_save_path += '/'
+
+            if Path(content_path).is_dir():
+                drive_save_path += torrent_name
+
+        # Check if the torrent is REMUX
+        elif torrent_name.count('REMUX'):
+            drive_save_path += '[REMUX]/'
+
+            # Check if torrent has language code
+            if torrent_name.count('AU'):
+                drive_save_path += '[AU]'
+            if torrent_name.count('FRA'):
+                drive_save_path += '[FRA]'
+            if torrent_name.count('GER'):
+                drive_save_path += '[GER]'
+            if torrent_name.count('ITA'):
+                drive_save_path += '[ITA]'
+            if torrent_name.count('JP'):
+                drive_save_path += '[JP]'
+            if torrent_name.count('UK'):
+                drive_save_path += '[UK]'
+            if torrent_name.count('US'):
+                drive_save_path += '[US]'
+
+            drive_save_path += '/'
+
+            if Path(content_path).is_dir():
+                drive_save_path += torrent_name
 
         # If no pattern found
         else:
-            if Path(pars.content_path).is_dir():
-                drive_save_path = pars.torrent_name
+            if Path(content_path).is_dir():
+                drive_save_path = torrent_name
 
     else:
-        if Path(pars.content_path).is_dir():
-            drive_save_path = pars.torrent_name
+        if Path(content_path).is_dir():
+            drive_save_path = torrent_name
 
 except Exception as excep:
     log.critical(excep)
@@ -211,7 +267,7 @@ try:
     popen_args = [
         f'{rclone_path}',
         f'{command}',
-        f'{pars.content_path}',
+        f'{content_path}',
         f'qbittorrent_rclone:{drive_save_path}',
         '--config',
         f'{config_file_path}',
